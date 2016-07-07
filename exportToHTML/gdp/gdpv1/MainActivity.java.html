@@ -1,0 +1,315 @@
+<html>
+<head>
+<title>MainActivity.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,128); font-weight: bold; }
+.s1 { color: rgb(0,0,0); }
+.s2 { color: rgb(128,128,128); font-style: italic; }
+.s3 { color: rgb(0,128,0); font-weight: bold; }
+.s4 { color: rgb(0,0,255); }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+MainActivity.java</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">package </span><span class="s1">gdp.gdpv1; 
+ 
+</span><span class="s0">import </span><span class="s1">android.content.Context; 
+</span><span class="s0">import </span><span class="s1">android.content.Intent; 
+</span><span class="s0">import </span><span class="s1">android.database.Cursor; 
+</span><span class="s0">import </span><span class="s1">android.net.ConnectivityManager; 
+</span><span class="s0">import </span><span class="s1">android.net.NetworkInfo; 
+</span><span class="s0">import </span><span class="s1">android.os.Bundle; 
+</span><span class="s0">import </span><span class="s1">android.support.design.widget.AppBarLayout; 
+</span><span class="s0">import </span><span class="s1">android.support.v4.widget.SwipeRefreshLayout; 
+</span><span class="s0">import </span><span class="s1">android.support.v7.widget.LinearLayoutManager; 
+</span><span class="s0">import </span><span class="s1">android.support.v7.widget.RecyclerView; 
+</span><span class="s0">import </span><span class="s1">android.support.v7.app.AppCompatActivity; 
+</span><span class="s0">import </span><span class="s1">android.support.v7.widget.Toolbar; 
+</span><span class="s0">import </span><span class="s1">android.view.Menu; 
+</span><span class="s0">import </span><span class="s1">android.view.MenuItem; 
+</span><span class="s0">import </span><span class="s1">android.view.View; 
+</span><span class="s0">import </span><span class="s1">java.io.BufferedReader; 
+</span><span class="s0">import </span><span class="s1">java.io.IOException; 
+</span><span class="s0">import </span><span class="s1">java.io.InputStreamReader; 
+</span><span class="s0">import </span><span class="s1">java.net.HttpURLConnection; 
+</span><span class="s0">import </span><span class="s1">java.net.URL; 
+</span><span class="s0">import </span><span class="s1">android.os.AsyncTask; 
+</span><span class="s0">import </span><span class="s1">android.widget.Toast; 
+</span><span class="s0">import </span><span class="s1">org.json.JSONArray; 
+</span><span class="s0">import </span><span class="s1">org.json.JSONException; 
+</span><span class="s0">import </span><span class="s1">org.json.JSONObject; 
+</span><span class="s0">import </span><span class="s1">java.text.SimpleDateFormat; 
+</span><span class="s0">import </span><span class="s1">java.util.ArrayList; 
+</span><span class="s0">import </span><span class="s1">java.util.Date; 
+</span><span class="s0">import </span><span class="s1">java.util.List; 
+</span><span class="s0">import </span><span class="s1">butterknife.BindView; 
+</span><span class="s0">import </span><span class="s1">butterknife.ButterKnife; 
+ 
+</span><span class="s0">public class </span><span class="s1">MainActivity </span><span class="s0">extends </span><span class="s1">AppCompatActivity </span><span class="s0">implements </span><span class="s1">AppBarLayout.OnOffsetChangedListener { 
+ 
+    </span><span class="s2">//declare variables</span><span class="s1"> 
+    List&lt;Data&gt; listData; 
+    String apikey; 
+ 
+    @BindView(R.id.toolbar_header_view) 
+    </span><span class="s0">protected </span><span class="s1">HeaderView toolbarHeaderView; 
+ 
+    @BindView(R.id.float_header_view) 
+    </span><span class="s0">protected </span><span class="s1">HeaderView floatHeaderView; 
+ 
+    @BindView(R.id.appbar) 
+    </span><span class="s0">protected </span><span class="s1">AppBarLayout appBarLayout; 
+ 
+    @BindView(R.id.toolbar) 
+    </span><span class="s0">protected </span><span class="s1">Toolbar toolbar; 
+ 
+    @BindView(R.id.scrollableView) 
+    </span><span class="s0">protected </span><span class="s1">RecyclerView recyclerView; 
+ 
+    @BindView(R.id.swipeRefreshLayout) 
+    </span><span class="s0">protected </span><span class="s1">SwipeRefreshLayout mSwipeRefreshLayout; 
+ 
+    </span><span class="s0">private boolean </span><span class="s1">isHideToolbarView = </span><span class="s0">false</span><span class="s1">; 
+ 
+    DatabaseHelper myDb; 
+ 
+ 
+    @Override 
+    </span><span class="s0">public void </span><span class="s1">onCreate(Bundle savedInstanceState) { 
+        </span><span class="s0">super</span><span class="s1">.onCreate(savedInstanceState); 
+        setContentView(R.layout.activity_main); 
+        myDb = </span><span class="s0">new </span><span class="s1">DatabaseHelper(</span><span class="s0">this</span><span class="s1">); 
+ 
+        ButterKnife.bind(</span><span class="s0">this</span><span class="s1">); 
+ 
+        setSupportActionBar(toolbar); 
+        getSupportActionBar().setHomeButtonEnabled(</span><span class="s0">true</span><span class="s1">); 
+ 
+        recyclerView.setHasFixedSize(</span><span class="s0">true</span><span class="s1">); 
+        LinearLayoutManager linearLayoutManager = </span><span class="s0">new </span><span class="s1">LinearLayoutManager(</span><span class="s0">this</span><span class="s1">); 
+        recyclerView.setLayoutManager(linearLayoutManager); 
+ 
+        apikey = </span><span class="s3">&quot;5276e6f0134c5b1d5f0d79e030d543be9977e8a64c465234694553f2df594151&quot;</span><span class="s1">; 
+        </span><span class="s0">new </span><span class="s1">getStreamsTask().execute(); 
+        initUi(); 
+        initializeData(); 
+        Adapter adapter = </span><span class="s0">new </span><span class="s1">Adapter(listData); 
+        recyclerView.setAdapter(adapter); 
+ 
+ 
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary, R.color.colorPrimaryDark, R.color.dark_grey); 
+ 
+        mSwipeRefreshLayout.setOnRefreshListener(</span><span class="s0">new </span><span class="s1">SwipeRefreshLayout.OnRefreshListener() { 
+            @Override 
+            </span><span class="s0">public void </span><span class="s1">onRefresh() { 
+                </span><span class="s0">if</span><span class="s1">(isNetworkAvailable()== </span><span class="s0">true</span><span class="s1">) 
+                { 
+                    </span><span class="s0">new </span><span class="s1">getStreamsTask().execute(); 
+                } 
+                </span><span class="s0">if</span><span class="s1">(isNetworkAvailable()==</span><span class="s0">false</span><span class="s1">){ 
+                    Toast.makeText(MainActivity.</span><span class="s0">this</span><span class="s1">, </span><span class="s3">&quot;No internet&quot;</span><span class="s1">, Toast.LENGTH_SHORT).show(); 
+                    mSwipeRefreshLayout.setRefreshing(</span><span class="s0">false</span><span class="s1">); 
+                } 
+            } 
+        }); 
+    } 
+ 
+    </span><span class="s0">private boolean </span><span class="s1">isNetworkAvailable() { 
+        ConnectivityManager connectivityManager 
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE); 
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo(); 
+        </span><span class="s0">return </span><span class="s1">activeNetworkInfo != </span><span class="s0">null </span><span class="s1">&amp;&amp; activeNetworkInfo.isConnected(); 
+    } 
+ 
+    @Override 
+    </span><span class="s0">public boolean </span><span class="s1">onCreateOptionsMenu(Menu menu) { 
+        </span><span class="s2">// Inflate the menu; this adds items to the action bar if it is present.</span><span class="s1"> 
+        getMenuInflater().inflate(R.menu.menu_main, menu); 
+        </span><span class="s0">return true</span><span class="s1">; 
+    } 
+ 
+    @Override 
+    </span><span class="s0">public boolean </span><span class="s1">onOptionsItemSelected(MenuItem item) { 
+        </span><span class="s2">// Handle action bar item clicks here. The action bar will</span><span class="s1"> 
+        </span><span class="s2">// automatically handle clicks on the Home/Up button, so long</span><span class="s1"> 
+        </span><span class="s2">// as you specify a parent activity in AndroidManifest.xml.</span><span class="s1"> 
+        </span><span class="s0">int </span><span class="s1">id = item.getItemId(); 
+        </span><span class="s2">//noinspection SimplifiableIfStatement</span><span class="s1"> 
+        </span><span class="s0">if </span><span class="s1">(id == R.id.action_settings) { 
+            startActivity(</span><span class="s0">new </span><span class="s1">Intent(</span><span class="s0">this</span><span class="s1">, SettingsActivity.</span><span class="s0">class</span><span class="s1">)); 
+            </span><span class="s0">return true</span><span class="s1">; 
+        } 
+        </span><span class="s0">if </span><span class="s1">(id == R.id.scan) { 
+            </span><span class="s0">return true</span><span class="s1">; 
+        } 
+        </span><span class="s0">return super</span><span class="s1">.onOptionsItemSelected(item); 
+    } 
+ 
+    </span><span class="s0">private void </span><span class="s1">initializeData() { 
+        listData = </span><span class="s0">new </span><span class="s1">ArrayList&lt;Data&gt;(); 
+        Cursor cursor = myDb.getData(); 
+        </span><span class="s0">if </span><span class="s1">(cursor.getCount() == </span><span class="s4">0</span><span class="s1">) { 
+            listData.add(</span><span class="s0">new </span><span class="s1">Data(</span><span class="s3">&quot;Temperature&quot;</span><span class="s1">, </span><span class="s3">&quot;NA&quot;</span><span class="s1">)); 
+            listData.add(</span><span class="s0">new </span><span class="s1">Data(</span><span class="s3">&quot;Humidity&quot;</span><span class="s1">, </span><span class="s3">&quot;NA&quot;</span><span class="s1">)); 
+            listData.add(</span><span class="s0">new </span><span class="s1">Data(</span><span class="s3">&quot;Soil Moisture&quot;</span><span class="s1">, </span><span class="s3">&quot;NA&quot;</span><span class="s1">)); 
+            listData.add(</span><span class="s0">new </span><span class="s1">Data(</span><span class="s3">&quot;Light Intensity&quot;</span><span class="s1">, </span><span class="s3">&quot;NA&quot;</span><span class="s1">)); 
+            listData.add(</span><span class="s0">new </span><span class="s1">Data(</span><span class="s3">&quot;Wind Direction&quot;</span><span class="s1">, </span><span class="s3">&quot;NA&quot;</span><span class="s1">)); 
+            listData.add(</span><span class="s0">new </span><span class="s1">Data(</span><span class="s3">&quot;Water Level&quot;</span><span class="s1">, </span><span class="s3">&quot;NA&quot;</span><span class="s1">)); 
+        } </span><span class="s0">else </span><span class="s1">{ 
+            cursor.moveToPosition(cursor.getCount() - </span><span class="s4">1</span><span class="s1">); 
+            listData.add(</span><span class="s0">new </span><span class="s1">Data(</span><span class="s3">&quot;Temperature&quot;</span><span class="s1">, cursor.getString(</span><span class="s4">2</span><span class="s1">) + </span><span class="s3">&quot;°C&quot;</span><span class="s1">)); 
+            listData.add(</span><span class="s0">new </span><span class="s1">Data(</span><span class="s3">&quot;Humidity&quot;</span><span class="s1">, cursor.getString(</span><span class="s4">3</span><span class="s1">) + </span><span class="s3">&quot;%&quot;</span><span class="s1">)); 
+            listData.add(</span><span class="s0">new </span><span class="s1">Data(</span><span class="s3">&quot;Soil Moisture&quot;</span><span class="s1">, cursor.getString(</span><span class="s4">4</span><span class="s1">) + </span><span class="s3">&quot;%&quot;</span><span class="s1">)); 
+            listData.add(</span><span class="s0">new </span><span class="s1">Data(</span><span class="s3">&quot;Light Intensity&quot;</span><span class="s1">, cursor.getString(</span><span class="s4">5</span><span class="s1">) + </span><span class="s3">&quot;%&quot;</span><span class="s1">)); 
+            listData.add(</span><span class="s0">new </span><span class="s1">Data(</span><span class="s3">&quot;Wind Direction&quot;</span><span class="s1">, cursor.getString(</span><span class="s4">6</span><span class="s1">))); 
+            listData.add(</span><span class="s0">new </span><span class="s1">Data(</span><span class="s3">&quot;Water Level&quot;</span><span class="s1">, cursor.getString(</span><span class="s4">7</span><span class="s1">) + </span><span class="s3">&quot;%&quot;</span><span class="s1">)); 
+        } 
+    } 
+ 
+    </span><span class="s0">private void </span><span class="s1">initUi() { 
+        appBarLayout.addOnOffsetChangedListener(</span><span class="s0">this</span><span class="s1">); 
+        Cursor cursor = myDb.getData(); 
+        </span><span class="s0">if </span><span class="s1">(cursor.getCount() == </span><span class="s4">0</span><span class="s1">) { 
+            toolbarHeaderView.bindTo(</span><span class="s3">&quot;Plant Environment Control System&quot;</span><span class="s1">, </span><span class="s3">&quot;Last updated at &quot; </span><span class="s1">+ </span><span class="s3">&quot;NA&quot;</span><span class="s1">); 
+            floatHeaderView.bindTo(</span><span class="s3">&quot;Plant Environment Control System&quot;</span><span class="s1">, </span><span class="s3">&quot;Last updated at &quot; </span><span class="s1">+ </span><span class="s3">&quot;NA&quot;</span><span class="s1">); 
+        } </span><span class="s0">else </span><span class="s1">{ 
+            cursor.moveToPosition(cursor.getCount() - </span><span class="s4">1</span><span class="s1">); 
+            toolbarHeaderView.bindTo(</span><span class="s3">&quot;Plant Environment Control System&quot;</span><span class="s1">, </span><span class="s3">&quot;Last updated at &quot; </span><span class="s1">+ cursor.getString(</span><span class="s4">0</span><span class="s1">)+</span><span class="s3">&quot; &quot;</span><span class="s1">+ 
+                    cursor.getString(</span><span class="s4">1</span><span class="s1">)); 
+            floatHeaderView.bindTo(</span><span class="s3">&quot;Plant Environment Control System&quot;</span><span class="s1">, </span><span class="s3">&quot;Last updated at &quot; </span><span class="s1">+ cursor.getString(</span><span class="s4">0</span><span class="s1">)+</span><span class="s3">&quot; &quot;</span><span class="s1">+ 
+                    cursor.getString(</span><span class="s4">1</span><span class="s1">)); 
+        } 
+    } 
+ 
+ 
+    @Override 
+    </span><span class="s0">public void </span><span class="s1">onOffsetChanged(AppBarLayout appBarLayout, </span><span class="s0">int </span><span class="s1">offset) { 
+        </span><span class="s0">int </span><span class="s1">maxScroll = appBarLayout.getTotalScrollRange(); 
+        </span><span class="s0">float </span><span class="s1">percentage = (</span><span class="s0">float</span><span class="s1">) Math.abs(offset) / (</span><span class="s0">float</span><span class="s1">) maxScroll; 
+ 
+        </span><span class="s0">if </span><span class="s1">(percentage == </span><span class="s4">1f </span><span class="s1">&amp;&amp; isHideToolbarView) { 
+            toolbarHeaderView.setVisibility(View.VISIBLE); 
+            isHideToolbarView = !isHideToolbarView; 
+ 
+        } </span><span class="s0">else if </span><span class="s1">(percentage &lt; </span><span class="s4">1f </span><span class="s1">&amp;&amp; !isHideToolbarView) { 
+            toolbarHeaderView.setVisibility(View.GONE); 
+            isHideToolbarView = !isHideToolbarView; 
+        } 
+    } 
+ 
+ 
+    </span><span class="s0">private class </span><span class="s1">getStreamsTask </span><span class="s0">extends </span><span class="s1">AsyncTask&lt;String, Void, String&gt; { 
+ 
+        </span><span class="s0">protected </span><span class="s1">String doInBackground(String... params) { 
+            </span><span class="s0">return </span><span class="s1">getData(); 
+        } 
+ 
+        </span><span class="s0">protected void </span><span class="s1">onPostExecute(String result) { 
+            </span><span class="s0">try </span><span class="s1">{ 
+                </span><span class="s2">//Data temperature = new Data(&quot;Temperature&quot;, tempdata + &quot;°C&quot;);</span><span class="s1"> 
+                </span><span class="s2">//Data humidity = new Data(&quot;Humidity&quot;, humdata + &quot;%&quot;);</span><span class="s1"> 
+                </span><span class="s2">// Data soil = new Data(&quot;Soil Moisture&quot;, soildata + &quot;%&quot;);</span><span class="s1"> 
+                </span><span class="s2">//Data light = new Data(&quot;Light Intensity&quot;, lightdata + &quot;%&quot;);</span><span class="s1"> 
+                </span><span class="s2">// Data wind_direction = new Data(&quot;Wind Direction&quot;, winddata);</span><span class="s1"> 
+                </span><span class="s2">// Data water = new Data(&quot;Water Level&quot;, waterdata + &quot;%&quot;);</span><span class="s1"> 
+                Cursor cursor = myDb.getData(); 
+                cursor.moveToPosition(cursor.getCount() - </span><span class="s4">1</span><span class="s1">); 
+                Data temperature = </span><span class="s0">new </span><span class="s1">Data(</span><span class="s3">&quot;Temperature&quot;</span><span class="s1">, cursor.getString(</span><span class="s4">2</span><span class="s1">) + </span><span class="s3">&quot;°C&quot;</span><span class="s1">); 
+                Data humidity = </span><span class="s0">new </span><span class="s1">Data(</span><span class="s3">&quot;Humidity&quot;</span><span class="s1">, cursor.getString(</span><span class="s4">3</span><span class="s1">) + </span><span class="s3">&quot;%&quot;</span><span class="s1">); 
+                Data soil = </span><span class="s0">new </span><span class="s1">Data(</span><span class="s3">&quot;Soil Moisture&quot;</span><span class="s1">, cursor.getString(</span><span class="s4">4</span><span class="s1">) + </span><span class="s3">&quot;%&quot;</span><span class="s1">); 
+                Data light = </span><span class="s0">new </span><span class="s1">Data(</span><span class="s3">&quot;Light Intensity&quot;</span><span class="s1">, cursor.getString(</span><span class="s4">5</span><span class="s1">) + </span><span class="s3">&quot;%&quot;</span><span class="s1">); 
+                Data wind_direction = </span><span class="s0">new </span><span class="s1">Data(</span><span class="s3">&quot;Wind Direction&quot;</span><span class="s1">, cursor.getString(</span><span class="s4">6</span><span class="s1">)); 
+                Data water = </span><span class="s0">new </span><span class="s1">Data(</span><span class="s3">&quot;Water Level&quot;</span><span class="s1">, cursor.getString(</span><span class="s4">7</span><span class="s1">) + </span><span class="s3">&quot;%&quot;</span><span class="s1">); 
+                listData.set(</span><span class="s4">0</span><span class="s1">, temperature); 
+                listData.set(</span><span class="s4">1</span><span class="s1">, humidity); 
+                listData.set(</span><span class="s4">2</span><span class="s1">, soil); 
+                listData.set(</span><span class="s4">3</span><span class="s1">, light); 
+                listData.set(</span><span class="s4">4</span><span class="s1">, wind_direction); 
+                listData.set(</span><span class="s4">5</span><span class="s1">, water); 
+                toolbarHeaderView.bindTo(</span><span class="s3">&quot;Plant Environment Control System&quot;</span><span class="s1">, </span><span class="s3">&quot;Last updated at &quot; </span><span class="s1">+ cursor.getString(</span><span class="s4">0</span><span class="s1">)+</span><span class="s3">&quot; &quot;</span><span class="s1">+ 
+                        cursor.getString(</span><span class="s4">1</span><span class="s1">)); 
+                floatHeaderView.bindTo(</span><span class="s3">&quot;Plant Environment Control System&quot;</span><span class="s1">, </span><span class="s3">&quot;Last updated at &quot; </span><span class="s1">+ cursor.getString(</span><span class="s4">0</span><span class="s1">)+</span><span class="s3">&quot; &quot;</span><span class="s1">+ 
+                        cursor.getString(</span><span class="s4">1</span><span class="s1">)); 
+                </span><span class="s2">// cursor.moveToPosition(cursor.getCount() - 1);</span><span class="s1"> 
+                </span><span class="s2">//String lasttime =cursor.getString(0);</span><span class="s1"> 
+                    </span><span class="s2">/*if(lasttime.equals(time)) { 
+                        //listData.add(new Data(&quot;date&quot;,date)); 
+                    } 
+                    else{ 
+                        myDb.addData(time, tempdata, humdata, soildata, lightdata, winddata, waterdata); 
+                    }*/</span><span class="s1"> 
+            Adapter adapter = </span><span class="s0">new </span><span class="s1">Adapter(listData); 
+            recyclerView.setAdapter(adapter); 
+            adapter.notifyDataSetChanged(); 
+                mSwipeRefreshLayout.setRefreshing(</span><span class="s0">false</span><span class="s1">); 
+        } 
+ 
+        </span><span class="s0">catch</span><span class="s1">(Exception e) 
+        { 
+            e.printStackTrace(); 
+            Toast.makeText(MainActivity.</span><span class="s0">this</span><span class="s1">, </span><span class="s3">&quot;No internet&quot;</span><span class="s1">, Toast.LENGTH_SHORT).show(); 
+            mSwipeRefreshLayout.setRefreshing(</span><span class="s0">false</span><span class="s1">); 
+        } 
+    } 
+ 
+    </span><span class="s0">protected </span><span class="s1">String getData() { 
+            String decodedString = </span><span class="s3">&quot;&quot;</span><span class="s1">; 
+            String returnMsg = </span><span class="s3">&quot;&quot;</span><span class="s1">; 
+            String request = </span><span class="s3">&quot;https://api.carriots.com/streams/?_t=str&amp;device=Soil@atzr95.atzr95&amp;owner=atzr95&quot;</span><span class="s1">; 
+            URL url; 
+            HttpURLConnection connection = </span><span class="s0">null</span><span class="s1">; 
+            </span><span class="s0">try </span><span class="s1">{ 
+                url = </span><span class="s0">new </span><span class="s1">URL(request); 
+                connection = (HttpURLConnection) url.openConnection(); 
+                connection.addRequestProperty(</span><span class="s3">&quot;carriots.apikey&quot;</span><span class="s1">, apikey); 
+                connection.addRequestProperty(</span><span class="s3">&quot;Content-Type&quot;</span><span class="s1">, </span><span class="s3">&quot;application/json&quot;</span><span class="s1">); 
+                connection.setRequestMethod(</span><span class="s3">&quot;GET&quot;</span><span class="s1">); 
+                BufferedReader in = </span><span class="s0">new </span><span class="s1">BufferedReader(</span><span class="s0">new </span><span class="s1">InputStreamReader(connection.getInputStream())); 
+                </span><span class="s0">while </span><span class="s1">((decodedString = in.readLine()) != </span><span class="s0">null</span><span class="s1">) { 
+                    returnMsg += decodedString; 
+                } 
+                in.close(); 
+                JSONObject json = </span><span class="s0">new </span><span class="s1">JSONObject(returnMsg); 
+                JSONArray results = json.getJSONArray(</span><span class="s3">&quot;result&quot;</span><span class="s1">); 
+ 
+                </span><span class="s0">for </span><span class="s1">(</span><span class="s0">int </span><span class="s1">i = </span><span class="s4">0</span><span class="s1">; i &lt; results.length(); i++) { 
+                    JSONObject d = results.getJSONObject(i); 
+                    Long date = d.getLong(</span><span class="s3">&quot;at&quot;</span><span class="s1">); 
+                    Date t = </span><span class="s0">new </span><span class="s1">Date(date * </span><span class="s4">1000L</span><span class="s1">); 
+                    SimpleDateFormat formattertime = </span><span class="s0">new </span><span class="s1">SimpleDateFormat(</span><span class="s3">&quot;HH:mm&quot;</span><span class="s1">); 
+                    SimpleDateFormat formatterdate = </span><span class="s0">new </span><span class="s1">SimpleDateFormat(</span><span class="s3">&quot;dd-MMM-yy&quot;</span><span class="s1">); 
+                    String time = formattertime.format(t); 
+                    String day=formatterdate.format(t); 
+ 
+                    JSONObject data = d.getJSONObject(</span><span class="s3">&quot;data&quot;</span><span class="s1">); 
+                    String humdata = data.getString(</span><span class="s3">&quot;hum&quot;</span><span class="s1">); 
+                    String tempdata = data.getString(</span><span class="s3">&quot;temp&quot;</span><span class="s1">); 
+                    String soildata = data.getString(</span><span class="s3">&quot;soil&quot;</span><span class="s1">); 
+                    String lightdata = data.getString(</span><span class="s3">&quot;light&quot;</span><span class="s1">); 
+                    String winddata = data.getString(</span><span class="s3">&quot;wind&quot;</span><span class="s1">); 
+                    String waterdata = data.getString(</span><span class="s3">&quot;water&quot;</span><span class="s1">); 
+                    myDb.addData(day,time, tempdata, humdata, soildata, lightdata, winddata, waterdata); 
+ 
+                } 
+                </span><span class="s0">return </span><span class="s1">returnMsg; 
+            } </span><span class="s0">catch </span><span class="s1">(IOException e) { 
+                e.printStackTrace(); 
+            } </span><span class="s0">catch </span><span class="s1">(JSONException e) { 
+                e.printStackTrace(); 
+                Toast.makeText(MainActivity.</span><span class="s0">this</span><span class="s1">, </span><span class="s3">&quot;No internet&quot;</span><span class="s1">, Toast.LENGTH_SHORT).show(); 
+                mSwipeRefreshLayout.setRefreshing(</span><span class="s0">false</span><span class="s1">); 
+            } 
+        </span><span class="s0">return </span><span class="s1">returnMsg; 
+    } 
+    } 
+} 
+</span></pre>
+</body>
+</html>
