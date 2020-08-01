@@ -7,5 +7,8 @@ This respository covers the Android App development portion of the project
 ### Block Diagram of the overall System
 ![Image of System](https://github.com/atzr95/GDP_Carriot_Android_app/blob/master/Weather_monitoring_system.PNG)
 
-### Finish App product
+### Finished App
+- Build using Android Studio
+- Stores data onto a SQLite Database after receiving data from Carriots through REST API
+- Uses MPAndroidChart for plotting graph
 ![Image of App](https://github.com/atzr95/GDP_Carriot_Android_app/blob/master/PECS.PNG)
